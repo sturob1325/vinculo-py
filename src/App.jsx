@@ -1,28 +1,27 @@
 import { useState } from 'react';
 import Onboarding from './pages/Onboarding';
+import Verification from './pages/Verification';
+import Dashboard from './pages/Dashboard';
 import { Sparkles } from 'lucide-react';
 
 export default function App() {
-  const [view, setView] = useState('test'); // 'test' or 'onboarding'
+  const [view, setView] = useState('start'); // 'start', 'interview', 'verify', 'success'
 
-  if (view === 'onboarding') {
-    return <Onboarding onComplete={() => setView('test')} />;
-  }
+  if (view === 'interview') return <Onboarding onComplete={() => setView('verify')} />;
+  if (view === 'verify') return <Verification onComplete={() => setView('success')} onCancel={() => setView('start')} />;
+  if (view === 'success') return <Dashboard />;
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-[#121212] p-4 text-white font-sans">
-      <div className="bg-[#1E1E1E] p-8 rounded-3xl border border-zinc-800 shadow-2xl text-center max-w-sm">
-        <h1 className="text-4xl font-black mb-4 bg-gradient-to-r from-[#27ae60] to-emerald-400 bg-clip-text text-transparent italic">
-          Vínculo PY
-        </h1>
-        <p className="text-zinc-400 mb-8">Setup successful. Your engine is ready for national launch.</p>
+    <div className="min-h-screen bg-[#121212] flex flex-col items-center justify-center p-8 text-white">
+      <div className="max-w-xs text-center">
+        <h1 className="text-5xl font-black italic text-[#27ae60] mb-4 tracking-tighter">VÍNCULO</h1>
+        <p className="text-zinc-500 text-sm mb-12 leading-relaxed">The only verified dating ecosystem in Paraguay. AI-matched, Cédula-secured.</p>
         
         <button 
-          onClick={() => setView('onboarding')}
-          className="group relative flex items-center gap-2 bg-[#27ae60] hover:bg-emerald-600 px-8 py-4 rounded-2xl font-bold transition-all hover:scale-105 active:scale-95 shadow-lg shadow-emerald-900/40"
+          onClick={() => setView('interview')}
+          className="w-full bg-[#27ae60] py-5 rounded-2xl font-bold text-lg hover:bg-emerald-600 transition-all shadow-xl shadow-emerald-900/20 active:scale-95 flex items-center justify-center gap-3"
         >
-          <Sparkles className="h-5 w-5" />
-          <span>Start AI Interview</span>
+          <Sparkles /> Start AI Interview
         </button>
       </div>
     </div>
