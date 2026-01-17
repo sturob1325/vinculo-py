@@ -1,29 +1,28 @@
 import { useState } from 'react';
 import Onboarding from './pages/Onboarding';
 import Verification from './pages/Verification';
+import Calculating from './pages/Calculating';
 import Dashboard from './pages/Dashboard';
-import { Sparkles } from 'lucide-react';
+import Chat from './pages/Chat'; // NEW IMPORT
 
 export default function App() {
-  const [view, setView] = useState('start'); // 'start', 'interview', 'verify', 'success'
+  const [view, setView] = useState('start'); 
+  const [selectedMatch, setSelectedMatch] = useState(null); // TRACK SELECTED MATCH
 
   if (view === 'interview') return <Onboarding onComplete={() => setView('verify')} />;
-  if (view === 'verify') return <Verification onComplete={() => setView('success')} onCancel={() => setView('start')} />;
-  if (view === 'success') return <Dashboard />;
+  if (view === 'verify') return <Verification onComplete={() => setView('calculating')} />;
+  if (view === 'calculating') return <Calculating onComplete={() => setView('success')} />;
+  
+  if (view === 'success') {
+    return <Dashboard onSelectMatch={(match) => {
+      setSelectedMatch(match);
+      setView('chat');
+    }} />;
+  }
 
-  return (
-    <div className="min-h-screen bg-[#121212] flex flex-col items-center justify-center p-8 text-white">
-      <div className="max-w-xs text-center">
-        <h1 className="text-5xl font-black italic text-[#27ae60] mb-4 tracking-tighter">VÍNCULO</h1>
-        <p className="text-zinc-500 text-sm mb-12 leading-relaxed">The only verified dating ecosystem in Paraguay. AI-matched, Cédula-secured.</p>
-        
-        <button 
-          onClick={() => setView('interview')}
-          className="w-full bg-[#27ae60] py-5 rounded-2xl font-bold text-lg hover:bg-emerald-600 transition-all shadow-xl shadow-emerald-900/20 active:scale-95 flex items-center justify-center gap-3"
-        >
-          <Sparkles /> Start AI Interview
-        </button>
-      </div>
-    </div>
-  );
+  if (view === 'chat') {
+    return <Chat match={selectedMatch} onBack={() => setView('success')} />;
+  }
+
+  // ... (Your Start Screen Return) ...
 }
