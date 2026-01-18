@@ -1,76 +1,121 @@
-import { useState } from 'react';
-import { Send, ChevronLeft, Sparkles, ShieldCheck } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { 
+  ArrowLeft, 
+  Send, 
+  MoreVertical, 
+  Phone, 
+  Video, 
+  ShieldCheck,
+  CheckCheck
+} from 'lucide-react';
 
-export default function Chat({ match, onBack }) {
+export default function Chat({ partner = { name: 'Valentina', image: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1974&auto=format&fit=crop' }, onBack }) {
   const [messages, setMessages] = useState([
-    { sender: 'ai', text: `Gabriela also loves San Bernardino on Sundays! Why not ask her about her favorite spot by the lake?`, isHint: true }
+    { id: 1, text: "Hey! I saw your profile. Your AI interview answers were actually really interesting.", sender: 'partner', time: '10:02 PM' },
+    { id: 2, text: "Haha thanks! I try to be honest. The AI picked up on my love for tereré pretty quickly.", sender: 'me', time: '10:05 PM' },
+    { id: 3, text: "Essential for surviving Asunción summers! ☀️", sender: 'partner', time: '10:06 PM' },
   ]);
-  const [input, setInput] = useState('');
+  const [newMessage, setNewMessage] = useState('');
+  const scrollRef = useRef(null);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
-    setMessages([...messages, { sender: 'me', text: input }]);
-    setInput('');
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
+
+    const msg = {
+      id: Date.now(),
+      text: newMessage,
+      sender: 'me',
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    setMessages([...messages, msg]);
+    setNewMessage('');
   };
 
   return (
-    <div className="min-h-screen bg-[#121212] text-white flex flex-col animate-in slide-in-from-right duration-500">
-      {/* Chat Header */}
-      <header className="p-6 border-b border-white/5 bg-[#1E1E1E]/50 backdrop-blur-xl flex items-center gap-4">
-        <button onClick={onBack} className="p-2 hover:bg-white/5 rounded-full transition-colors">
-          <ChevronLeft size={24} />
-        </button>
-        <div className="relative">
-          <img src={match.img} className="h-10 w-10 rounded-full object-cover border border-[#27ae60]" alt={match.name} />
-          <div className="absolute -bottom-1 -right-1 bg-[#27ae60] h-3 w-3 rounded-full border-2 border-[#121212]" />
-        </div>
-        <div>
-          <div className="flex items-center gap-1">
-            <h3 className="font-bold">{match.name}</h3>
-            <ShieldCheck size={14} className="text-[#D4AF37]" />
+    <div className="fixed inset-0 z-[60] bg-white flex flex-col h-screen overflow-hidden">
+      {/* Premium Chat Header */}
+      <header className="bg-white/80 backdrop-blur-md border-b border-zinc-100 p-4 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-3">
+          <button onClick={onBack} className="p-2 -ml-2 text-zinc-400 hover:text-zinc-900">
+            <ArrowLeft size={24} />
+          </button>
+          <div className="relative">
+            <img src={partner.image} className="w-10 h-10 rounded-full object-cover border-2 border-rose-50" alt={partner.name} />
+            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
           </div>
-          <p className="text-[10px] text-[#27ae60] font-bold uppercase tracking-wider">Matched by AI</p>
+          <div>
+            <div className="flex items-center gap-1">
+              <h2 className="font-black text-sm tracking-tight">{partner.name}</h2>
+              <ShieldCheck size={12} className="text-[#FF2D55]" />
+            </div>
+            <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-tighter">Online now</p>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-2 text-zinc-300">
+          <button className="p-2 hover:text-[#FF2D55] transition-colors"><Phone size={20} /></button>
+          <button className="p-2 hover:text-[#FF2D55] transition-colors"><Video size={20} /></button>
+          <button className="p-2 hover:text-zinc-900"><MoreVertical size={20} /></button>
         </div>
       </header>
 
-      {/* Messages Area */}
-      <div className="flex-grow p-6 space-y-6 overflow-y-auto">
-        {messages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[80%] p-4 rounded-2xl ${
-              msg.sender === 'me' 
-              ? 'bg-[#27ae60] text-white rounded-tr-none' 
-              : msg.isHint 
-                ? 'bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] italic rounded-tl-none' 
-                : 'bg-zinc-800 text-zinc-200 rounded-tl-none'
-            }`}>
-              {msg.isHint && <div className="flex items-center gap-1 mb-1 not-italic font-bold text-[10px] uppercase tracking-widest text-[#D4AF37]">
-                <Sparkles size={10} /> AI Wingman Suggestion
-              </div>}
-              <p className="text-sm leading-relaxed">{msg.text}</p>
+      {/* Message List */}
+      <main className="flex-1 overflow-y-auto p-6 space-y-6 bg-[#FAFAFA]">
+        <div className="text-center py-4">
+          <span className="text-[10px] font-black text-zinc-300 uppercase tracking-[0.2em]">Match made today</span>
+        </div>
+
+        {messages.map((msg) => (
+          <div 
+            key={msg.id} 
+            className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}
+          >
+            <div className={`max-w-[75%] space-y-1`}>
+              <div className={`px-5 py-3 rounded-[1.8rem] text-sm leading-relaxed shadow-sm ${
+                msg.sender === 'me' 
+                  ? 'bg-[#FF2D55] text-white rounded-tr-none' 
+                  : 'bg-white text-zinc-700 rounded-tl-none border border-zinc-100'
+              }`}>
+                {msg.text}
+              </div>
+              <div className={`flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-zinc-400 ${
+                msg.sender === 'me' ? 'justify-end' : 'justify-start'
+              }`}>
+                {msg.time}
+                {msg.sender === 'me' && <CheckCheck size={10} className="text-[#FF2D55]" />}
+              </div>
             </div>
           </div>
         ))}
-      </div>
+        <div ref={scrollRef} />
+      </main>
 
-      {/* Input Area */}
-      <div className="p-6 bg-[#121212] border-t border-white/5">
-        <div className="flex gap-2 bg-zinc-900 rounded-2xl p-2 items-center border border-white/5">
+      {/* Modern Input Area */}
+      <footer className="p-6 bg-white border-t border-zinc-100 pb-10">
+        <form onSubmit={handleSendMessage} className="relative flex items-center gap-2">
           <input 
-            className="flex-grow bg-transparent p-3 outline-none text-sm"
-            placeholder="Type a message..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            placeholder={`Message ${partner.name}...`}
+            className="w-full bg-zinc-50 border-none rounded-[2rem] px-6 py-4 text-sm focus:ring-2 focus:ring-rose-100 transition-all placeholder:text-zinc-300"
           />
           <button 
-            onClick={handleSend}
-            className="p-3 bg-[#27ae60] rounded-xl hover:bg-emerald-600 transition-all active:scale-95 shadow-lg shadow-emerald-900/20"
+            type="submit"
+            disabled={!newMessage.trim()}
+            className="bg-[#FF2D55] text-white p-4 rounded-full shadow-lg shadow-rose-200 active:scale-95 disabled:opacity-50 disabled:grayscale transition-all"
           >
-            <Send size={18} />
+            <Send size={20} />
           </button>
-        </div>
-      </div>
+        </form>
+      </footer>
     </div>
   );
 }
